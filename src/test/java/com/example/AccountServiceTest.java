@@ -1,36 +1,62 @@
 package com.example;
 
-import org.junit.Before;
-import org.junit.Test;
+import com.example.exception.TransactionFailedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.ref.Cleaner;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class AccountServiceTest {
     private Account account;
     private Client client;
     private Account mockedAccount;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.account = new Account();
         this.mockedAccount = mock(Account.class);
-        account.deposit(1000);
-        account.deposit(2000);
-        account.withdraw(500);
         this.client = new Client("Jane Doe", mockedAccount);
     }
 
     @Test
-    public void shouldPrint() {
-        // Reading the output written in the console.
+    @DisplayName("should_deposit")
+    public void shouldDeposit() {
+        account.deposit(1000);
+        assertEquals(1000, account.getBalance());
+    }
+
+    @Test
+    @DisplayName("should_withdraw")
+    public void shouldWithdraw() {
+        account.setBalance(2000);
+        account.withdraw(1000);
+        assertEquals(1000, account.getBalance());
+    }
+
+    @Test
+    @DisplayName("should_throw_transaction_exception")
+    public void shouldThrowException() {
+        assertThrowsExactly(TransactionFailedException.class, () ->
+                account.withdraw(1000)
+        );
+    }
+
+    @Test
+    @DisplayName("should_print_statement")
+    public void shouldPrintStatement() {
+        account.deposit(1000);
+        account.deposit(2000);
+        account.withdraw(500);
+        // Reading the output written in the console after print.
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStream));
         account.printStatement(); // Calling the real method implementation.

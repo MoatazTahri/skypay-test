@@ -1,6 +1,9 @@
 package com.example;
 
+import com.example.exception.TransactionFailedException;
 import com.example.service.AccountService;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,7 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Account implements AccountService {
+    @Getter@Setter
     private int balance;
+    @Getter
     private final List<Transaction> transactions;
     private long lastTimestamp = 0;
 
@@ -37,6 +42,9 @@ public class Account implements AccountService {
 
     @Override
     public void withdraw(int amount) {
+        if (this.balance < amount) {
+            throw new TransactionFailedException("Your account has no sufficient funds");
+        }
         long now = System.currentTimeMillis();
 
         if (now <= lastTimestamp) {
